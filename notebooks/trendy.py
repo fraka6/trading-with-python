@@ -1,3 +1,10 @@
+import numpy as np
+
+
+def movingaverage(interval, window_size=14):
+    window = np.ones(int(window_size))/float(window_size)
+    return np.convolve(interval, window, 'same')
+
 def gentrends(x, window=1/3.0, charts=True):
     """
     Returns a Pandas dataframe with support and resistance lines.
@@ -70,8 +77,9 @@ def segtrends(x, segments=2, charts=True):
     """
 
     import numpy as np
+    n = len(x)
     y = np.array(x)
-
+    movy = movingaverage(y, 14)
     # Implement trendlines
     # Find the indexes of these maxima in the data
     segments = int(segments)
@@ -88,7 +96,6 @@ def segtrends(x, segments=2, charts=True):
         minima[i-1] = min(seg)
         x_maxima[i-1] = ind1 + (np.where(seg == maxima[i-1])[0][0])
         x_minima[i-1] = ind1 + (np.where(seg == minima[i-1])[0][0])
-        print i,ind1,(np.where(seg == minima[i-1])[0][0])
 
     if charts:
         import matplotlib.pyplot as plt
@@ -112,12 +119,27 @@ def segtrends(x, segments=2, charts=True):
             pass
 
     if charts:
+        plt.plot(range(n), movy, 'b')
         plt.plot(x_maxima, maxima, 'g')
         plt.plot(x_minima, minima, 'r')
         plt.show()
 
+    # generate order strategy
+    order = np.zeros(n)
+    for i in range(n):
+        # get 2 latest support point y values prior to x
+        pmin = list(minima[np.where(x_minima<=i)][-2:])
+        pmax = list(maxima[np.where(x_maxima<=i)][-2:])
+        
+        min_sell = True if ((len(pmin)==2) and (pmin[1]-pmin[0])<0) else False 
+        max_sell = True if ((len(pmax)==2) and (pmax[1]-pmax[0])<0) else False 
+    
+        order[i]=-1 if (min_sell and max_sell) else 0
+        order[i]= 1 if ((order[i] == 0) and (y[i]<movy[i])) else -1
+    
+
     # OUTPUT
-    return x_maxima, maxima, x_minima, minima
+    return x_maxima, maxima, x_minima, minima, order
 
 def minitrends(x, window=20, charts=True):
     """
