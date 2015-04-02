@@ -3,7 +3,18 @@ import numpy as np
 
 def movingaverage(interval, window_size=14):
     window = np.ones(int(window_size))/float(window_size)
-    return np.convolve(interval, window, 'same')
+    ma= np.convolve(interval, window, 'same')
+    
+    w = window_size
+    x = np.array(interval)
+    n = len(ma)
+    
+    start = n-w
+    # pad the end properly
+    for i in range(start, start+w):
+        seq=x[i-w:i]
+        ma[i]=seq.sum()/len(seq)
+    return ma
 
 def gentrends(x, window=1/3.0, charts=True):
     """
@@ -79,7 +90,7 @@ def segtrends(x, segments=2, charts=True, momentum=False):
     import numpy as np
     n = len(x)
     y = np.array(x)
-    movy = movingaverage(y, 14)
+    movy = movingaverage(y, 7)
     # Implement trendlines
     # Find the indexes of these maxima in the data
     segments = int(segments)
@@ -149,20 +160,21 @@ def segtrends(x, segments=2, charts=True, momentum=False):
         order[i] = buy
         last_buy = y[i] if (buy==1) else last_buy
         last_sale = y[i] if (buy==-1) else last_sale
-
+        
+        import math
         if momentum:
             # add momentum for buy 
             if (buy==1) and (order[i-1]>=1):
-                if buy_price_dec:
-                    order[i]=round(order[i-1]*1.5)
-                else:
-                    order[i]=max(1, round(order[i-1]/2))
+                #if buy_price_dec:
+                order[i]=round(math.log(2*order[i-1])+1)
+                #else:
+                 #   order[i]=max(1, round(order[i-1]/2))
             # add momentum for sale
             elif (buy==-1) and (order[i-1]<=-1):
-                if sale_price_dec:
-                    order[i]=order[i-1]*2
-                else:
-                    order[i]=max(1, round(order[i-1]/2))
+                #if sale_price_dec:
+                order[i]*=round(math.log(abs(order[i-1]*2))+1)
+                #else:
+                #    order[i]=max(1, round(order[i-1]/2))
 
     # OUTPUT
     return x_maxima, maxima, x_minima, minima, order
