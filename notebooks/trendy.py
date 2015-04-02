@@ -73,22 +73,22 @@ def segtrends(x, segments=2, charts=True):
     y = np.array(x)
 
     # Implement trendlines
+    # Find the indexes of these maxima in the data
     segments = int(segments)
     maxima = np.ones(segments)
-    minima = np.ones(segments)
+    minima = np.ones(segments) 
+    x_maxima = np.ones(segments)
+    x_minima = np.ones(segments)
     segsize = int(len(y)/segments)
     for i in range(1, segments+1):
         ind2 = i*segsize
         ind1 = ind2 - segsize
-        maxima[i-1] = max(y[ind1:ind2])
-        minima[i-1] = min(y[ind1:ind2])
-
-    # Find the indexes of these maxima in the data
-    x_maxima = np.ones(segments)
-    x_minima = np.ones(segments)
-    for i in range(0, segments):
-        x_maxima[i] = np.where(y == maxima[i])[0][0]
-        x_minima[i] = np.where(y == minima[i])[0][0]
+        seg = y[ind1:ind2]
+        maxima[i-1] = max(seg)
+        minima[i-1] = min(seg)
+        x_maxima[i-1] = ind1 + (np.where(seg == maxima[i-1])[0][0])
+        x_minima[i-1] = ind1 + (np.where(seg == minima[i-1])[0][0])
+        print i,ind1,(np.where(seg == minima[i-1])[0][0])
 
     if charts:
         import matplotlib.pyplot as plt
@@ -107,10 +107,13 @@ def segtrends(x, segments=2, charts=True):
         minline = np.linspace(a_min, b_min, len(y))
 
         if charts:
-            plt.plot(maxline, 'g')
-            plt.plot(minline, 'r')
+            #plt.plot(maxline, 'g')
+            #plt.plot(minline, 'r')
+            pass
 
     if charts:
+        plt.plot(x_maxima, maxima, 'g')
+        plt.plot(x_minima, minima, 'r')
         plt.show()
 
     # OUTPUT
