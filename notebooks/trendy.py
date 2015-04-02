@@ -65,7 +65,7 @@ def gentrends(x, window=1/3.0, charts=True):
 
     return trends, maxslope, minslope
 
-def segtrends(x, segments=2, charts=True):
+def segtrends(x, segments=2, charts=True, momentum=False):
     """
     Turn minitrends to iterative process more easily adaptable to
     implementation in simple trading systems; allows backtesting functionality.
@@ -126,17 +126,43 @@ def segtrends(x, segments=2, charts=True):
 
     # generate order strategy
     order = np.zeros(n)
-    for i in range(n):
+    last_buy = y[0]
+    last_sale = y[0]
+
+    for i in range(1,n):
         # get 2 latest support point y values prior to x
         pmin = list(minima[np.where(x_minima<=i)][-2:])
         pmax = list(maxima[np.where(x_maxima<=i)][-2:])
-        
+        # sell if support slop is negative
         min_sell = True if ((len(pmin)==2) and (pmin[1]-pmin[0])<0) else False 
         max_sell = True if ((len(pmax)==2) and (pmax[1]-pmax[0])<0) else False 
-    
-        order[i]=-1 if (min_sell and max_sell) else 0
-        order[i]= 1 if ((order[i] == 0) and (y[i]<movy[i])) else -1
-    
+
+        # if support down, sell
+        buy = -1 if (min_sell and max_sell) else 0
+        # buy only if lower the moving average else sale
+        buy = 1 if ((buy == 0) and (y[i]<movy[i])) else -1
+        # sell only if ...
+        buy= -1 if ((buy == -1) and y[i]>last_buy) else 1
+      
+        buy_price_dec = y[i]<last_buy
+        sale_price_dec = y[i]<last_sale
+        order[i] = buy
+        last_buy = y[i] if (buy==1) else last_buy
+        last_sale = y[i] if (buy==-1) else last_sale
+
+        if momentum:
+            # add momentum for buy 
+            if (buy==1) and (order[i-1]>=1):
+                if buy_price_dec:
+                    order[i]=round(order[i-1]*1.5)
+                else:
+                    order[i]=max(1, round(order[i-1]/2))
+            # add momentum for sale
+            elif (buy==-1) and (order[i-1]<=-1):
+                if sale_price_dec:
+                    order[i]=order[i-1]*2
+                else:
+                    order[i]=max(1, round(order[i-1]/2))
 
     # OUTPUT
     return x_maxima, maxima, x_minima, minima, order
