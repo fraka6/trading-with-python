@@ -87,4 +87,5 @@ def eval(stockname='TSLA', field='open', months=12,
         
         bt.data.plot()
         title('all strategy data')
+    return bt.data
 
