@@ -1,19 +1,20 @@
 import numpy as np
 
 
-def movingaverage(interval, window_size=14):
+def movingaverage(interval, window_size=14, pad=False):
     window = np.ones(int(window_size))/float(window_size)
     ma= np.convolve(interval, window, 'same')
     
-    w = window_size
-    x = np.array(interval)
-    n = len(ma)
-    
-    start = n-w
     # pad the end properly
-    for i in range(start, start+w):
-        seq=x[i-w:i]
-        ma[i]=seq.sum()/len(seq)
+    if pad:
+        w = window_size
+        x = np.array(interval)
+        n = len(ma)
+        start = n-w
+
+        for i in range(start, start+w):
+            seq=x[i-w:i]
+            ma[i]=seq.sum()/len(seq)
     return ma
 
 def gentrends(x, window=1/3.0, charts=True):

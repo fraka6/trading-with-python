@@ -68,11 +68,10 @@ def orders2strategy(orders, price, min_stocks=1):
 def eval(stockname='TSLA', field='open', months=12, 
              initialCash=20000, min_stocks=30, charts=True):
     import tradingWithPython.lib.yahooFinance as yahoo 
-    from pylab import title, figure, subplot
+    from pylab import title, figure
     n = (5*4)*months
     price = yahoo.getHistoricData(stockname)[field][-n:] 
     if charts:
-        subplot(311)
         title('automatic strategy')
     orders = orders_from_trends(price, segments=n/5, charts=charts, 
                                 momentum=True); 
@@ -81,15 +80,11 @@ def eval(stockname='TSLA', field='open', months=12,
     # do the backtest
     bt = twp.Backtest(price, strategy, initialCash=initialCash, signalType='shares')
     if charts:
-        subplot(312)
         bt.plotTrades()
-
-        subplot(313)
+        figure()
         bt.pnl.plot()
         title('pnl')
         
-        
-        subplot(313)
         bt.data.plot()
         title('all strategy data')
 
