@@ -1,9 +1,10 @@
 
 import numpy as np
-from trendy import segtrends
+from util.trendy import segtrends
 import pandas as pd
-import tradingWithPython as twp
-from filter import movingaverage
+#import tradingWithPython as twp
+#from lib import backtest
+from util.filter import movingaverage
 
 def orders_from_trends(x, segments=2, charts=True, window=7, momentum=False):
     ''' generate orders from segtrends '''
@@ -67,25 +68,31 @@ def orders2strategy(orders, price, min_stocks=1):
 
 def eval(stockname='TSLA', field='open', months=12, 
              initialCash=20000, min_stocks=30, charts=True):
-    import tradingWithPython.lib.yahooFinance as yahoo 
+    print "Evaluation ", stockname
+    import lib.yahooFinance as yahoo 
+    import lib.backtest as twp
     from pylab import title, figure
     n = (5*4)*months
     price = yahoo.getHistoricData(stockname)[field][-n:] 
     if charts:
-        title('automatic strategy')
-    orders = orders_from_trends(price, segments=n/5, charts=charts, 
+        #title('automatic strategy %s' %stockname)
+        pass
+    orders = orders_from_trends(price, segments=n/5, charts=False, 
                                 momentum=True); 
     strategy = orders2strategy(orders, price, min_stocks)
         
     # do the backtest
     bt = twp.Backtest(price, strategy, initialCash=initialCash, signalType='shares')
     if charts:
-        bt.plotTrades()
+        #bt.plotTrades()
         figure()
         bt.pnl.plot()
-        title('pnl')
+        title('pnl '+stockname)
         
-        bt.data.plot()
-        title('all strategy data')
-    return bt.data
+        #bt.data.plot()
+        #title('all strategy data %s' %stockname)
+    #return bt.data
 
+if __name__ == "__main__":
+    #eval(charts=True)
+    pass
