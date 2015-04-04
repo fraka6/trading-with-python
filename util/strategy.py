@@ -1,11 +1,12 @@
-
 import numpy as np
 from util.trendy import segtrends
 import pandas as pd
 #import tradingWithPython as twp
 #from lib import backtest
 from util.filter import movingaverage
-
+#!pip install mlboost
+from mlboost.core.pphisto import SortHistogram
+  
 def orders_from_trends(x, segments=2, charts=True, window=7, momentum=False):
     ''' generate orders from segtrends '''
     x_maxima, maxima, x_minima, minima = segtrends(x, segments, charts, window)
@@ -67,8 +68,10 @@ def orders2strategy(orders, price, min_stocks=1):
     return strategy
 
 def eval(stockname='TSLA', field='open', months=12, 
-             initialCash=20000, min_stocks=30, charts=True):
-    print "Evaluation ", stockname
+        initialCash=20000, min_stocks=30, 
+        charts=True, verbose=False):
+    if verbose:
+      print "Evaluation ", stockname
     import lib.yahooFinance as yahoo 
     import lib.backtest as twp
     from pylab import title, figure
@@ -93,7 +96,29 @@ def eval(stockname='TSLA', field='open', months=12,
         
         bt.data.plot()
         title('all strategy data %s' %stockname)
-    #return bt.data
+    return bt.data
+
+def eval_best(stocks=["TSLA", "GS", "SCTY", "AMZN", "CSCO", 'UTX','JCI',"GOOGL",'AAPL','BP'],
+              field='open', months=12, 
+              initialCash=20000, min_stocks=30, 
+              charts=True, verbose=False):
+  # try current strategy on different stock
+  trademap = {}
+  tradedetails = {}
+
+  for i, stock in enumerate(stocks):
+    trade = eval(stock, field='open', months=months, initialCash=20000, min_stocks=30, 
+                          charts=charts, verbose=verbose)
+    if verbose:
+      print i, stock, trade.ix[-1:,'cash':]
+    trademap[stock] = trade[-1:]['pnl'][-1]
+    tradedetails[stock] = trade[-1:]
+  st = SortHistogram(trademap, False, True)
+  if verbose:
+    for i,el in enumerate(st):
+      stock, value = el
+      print "#", i+1, stock, tradedetails[stock]
+  return st
 
 if __name__ == "__main__":
     #eval(charts=True)
