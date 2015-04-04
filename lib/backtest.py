@@ -126,7 +126,7 @@ class Backtest(object):
         '''easy access to pnl data column '''
         return self.data['pnl']
     
-    def plotTrades(self):
+    def plotTrades(self, name=''):
         """ 
         visualise trades on the price chart 
             long entry : green triangle up
@@ -165,7 +165,7 @@ class Backtest(object):
         plt.xlim([p.index[0],p.index[-1]]) # show full axis
         
         plt.legend(l,loc='best')
-        plt.title('trades')
+        plt.title('trades%s' %name)
         
         
 class ProgressBar:

@@ -75,22 +75,24 @@ def eval(stockname='TSLA', field='open', months=12,
     n = (5*4)*months
     price = yahoo.getHistoricData(stockname)[field][-n:] 
     if charts:
-        #title('automatic strategy %s' %stockname)
+        figure()
+        title('automatic strategy %s' %stockname)
         pass
-    orders = orders_from_trends(price, segments=n/5, charts=False, 
+    orders = orders_from_trends(price, segments=n/5, charts=charts, 
                                 momentum=True); 
     strategy = orders2strategy(orders, price, min_stocks)
         
     # do the backtest
     bt = twp.Backtest(price, strategy, initialCash=initialCash, signalType='shares')
     if charts:
-        #bt.plotTrades()
+        figure()  
+        bt.plotTrades(stockname)
         figure()
         bt.pnl.plot()
         title('pnl '+stockname)
         
-        #bt.data.plot()
-        #title('all strategy data %s' %stockname)
+        bt.data.plot()
+        title('all strategy data %s' %stockname)
     #return bt.data
 
 if __name__ == "__main__":
