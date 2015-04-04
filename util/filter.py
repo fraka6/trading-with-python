@@ -1,6 +1,6 @@
 import numpy as np
 
-def movingaverage(interval, window_size=14, pad=False):
+def movingaverage(interval, window_size=14, pad=True):
     ''' padded moving average '''
     window = np.ones(int(window_size))/float(window_size)
     ma= np.convolve(interval, window, 'same')
