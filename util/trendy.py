@@ -54,7 +54,8 @@ def gentrends(x, window=1/3.0, charts=True):
                           columns=['Data', 'Max Line', 'Min Line'])
 
     if charts is True:
-        from matplotlib.pyplot import plot, grid, show
+        from matplotlib.pyplot import plot, grid, show, figure
+        figure()
         plot(trends)
         grid()
         show()
