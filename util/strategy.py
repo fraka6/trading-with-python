@@ -80,7 +80,7 @@ def eval(stockname='TSLA', field='open', months=12,
     import lib.yahooFinance as yahoo 
     import lib.backtest as bt
     
-    from pylab import title, figure
+    from pylab import title, figure, savefig, subplot
     n = (5*4)*months
     price = yahoo.getHistoricData(stockname)[field][-n:] 
     if (charts and debug):
@@ -95,12 +95,15 @@ def eval(stockname='TSLA', field='open', months=12,
     btr = bt.Backtest(price, strategy, initialCash=initialCash, signalType='shares')
     if charts:
         print "#1) Automatic buy/sales visualisation of the current strategy (buy=long, short=sale)"
-        figure()
+	subplot(211)        
+	#figure()
         btr.plotTrades(stockname)
+	subplot(212)
         print "#2) Evaluation of the strategy (PnL (Profit & Log) = Value today - Value yesterday)"
-        figure()
+        #figure()
         btr.pnl.plot()
         title('pnl '+stockname)
+	savefig('eval.png')
         print "#3) big picture: Price, shares, value, cash & PnL"
         btr.data.plot()
         title('all strategy data %s' %stockname)
