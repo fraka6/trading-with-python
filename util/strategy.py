@@ -7,8 +7,9 @@ from filter import movingaverage
 #!pip install mlboost
 from mlboost.core.pphisto import SortHistogram
 
-import os
-os.path.dirname(os.path.join(os.path.abspath(__file__), '..'))
+# little hack to make in working inside heroku twp submodule
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../'))
       
 def orders_from_trends(x, segments=2, charts=True, window=7, momentum=False):
     ''' generate orders from segtrends '''
