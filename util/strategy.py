@@ -1,9 +1,9 @@
 import numpy as np
-from util.trendy import segtrends
+from trendy import segtrends
 import pandas as pd
 #import tradingWithPython as twp
 #from lib import backtest
-from util.filter import movingaverage
+from filter import movingaverage
 #!pip install mlboost
 from mlboost.core.pphisto import SortHistogram
   
