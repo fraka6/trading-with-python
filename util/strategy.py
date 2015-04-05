@@ -79,7 +79,7 @@ def eval(stockname='TSLA', field='open', months=12,
       print "Evaluation ", stockname
     
     import lib.yahooFinance as yahoo 
-    import lib.backtest as twp
+    import lib.backtest as bt
     
     from pylab import title, figure
     n = (5*4)*months
@@ -93,20 +93,20 @@ def eval(stockname='TSLA', field='open', months=12,
     strategy = orders2strategy(orders, price, min_stocks)
         
     # do the backtest
-    bt = twp.Backtest(price, strategy, initialCash=initialCash, signalType='shares')
+    btr = bt.Backtest(price, strategy, initialCash=initialCash, signalType='shares')
     if charts:
         print "#1) Automatic buy/sales visualisation of the current strategy (buy=long, short=sale)"
         figure()
-        bt.plotTrades(stockname)
+        btr.plotTrades(stockname)
         print "#2) Evaluation of the strategy (PnL (Profit & Log) = Value today - Value yesterday)"
         figure()
-        bt.pnl.plot()
+        btr.pnl.plot()
         title('pnl '+stockname)
         print "#3) big picture: Price, shares, value, cash & PnL"
-        bt.data.plot()
+        btr.data.plot()
         title('all strategy data %s' %stockname)
         
-    return bt.data
+    return btr.data
 
 def eval_best(stocks=["TSLA", "GS", "SCTY", "AMZN", "CSCO", 'UTX','JCI',"GOOGL",'AAPL','BP'],
               field='open', months=12, 
