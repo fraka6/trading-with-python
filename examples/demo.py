@@ -1,28 +1,21 @@
+''' simulate a buy/sale strategy on a stock & evaluate its PnL (profit and Lost) '''
 #!pip install mlboost
 from util import strategy 
 reload(strategy)
 
-charts = False
+charts = True
 verbose = True
+
 months=12
 
-stock ="BBD.B"
-stock ="AAPL"
-#stock="GAZP" #don't work
+#stock ="AAPL"
 #stock='TA' #oil
 #stock='BP' # oil
-#stock='XOM'# don't work
 
-stocks = ["TSLA", "GS", "SCTY", "AMZN", "CSCO", 
-          'UTX','JCI',"GOOGL",'AAPL','BP']
-if False:
-  x=strategy.eval(stock, field='open', months=months, 
+stock = 'TSLA'
+
+summary = strategy.eval(stock, field='open', months=months, 
                   initialCash=10000, min_stocks=50, 
-                  charts=charts, verbose=verbose)
-  print stock, x.ix[-1:,'cash':]
-else:
-  # try current strategy on different stock
-  strategy.eval_best(stocks, field='open', months=months, 
-                  initialCash=10000, min_stocks=50, 
-                  charts=charts, verbose=verbose)
-  
+                  charts=charts, verbose=verbose);
+
+print stock, summary.ix[-1:,'cash':]

@@ -1,12 +1,17 @@
 import numpy as np
-from util.trendy import segtrends
+from trendy import segtrends
 import pandas as pd
 #import tradingWithPython as twp
 #from lib import backtest
-from util.filter import movingaverage
+from filter import movingaverage
 #!pip install mlboost
 from mlboost.core.pphisto import SortHistogram
-  
+
+try:
+    import lib
+except:
+    import twp.lib as lib
+      
 def orders_from_trends(x, segments=2, charts=True, window=7, momentum=False):
     ''' generate orders from segtrends '''
     x_maxima, maxima, x_minima, minima = segtrends(x, segments, charts, window)
@@ -69,52 +74,58 @@ def orders2strategy(orders, price, min_stocks=1):
 
 def eval(stockname='TSLA', field='open', months=12, 
         initialCash=20000, min_stocks=30, 
-        charts=True, verbose=False):
+        charts=True, verbose=False, debug=False):
     if verbose:
       print "Evaluation ", stockname
+    
     import lib.yahooFinance as yahoo 
     import lib.backtest as twp
+    
     from pylab import title, figure
     n = (5*4)*months
     price = yahoo.getHistoricData(stockname)[field][-n:] 
-    if charts:
+    if (charts and debug):
         figure()
-        title('automatic strategy %s' %stockname)
-        pass
-    orders = orders_from_trends(price, segments=n/5, charts=charts, 
+        title('automatic strategy base %s' %stockname)
+
+    orders = orders_from_trends(price, segments=n/5, charts=(charts and debug), 
                                 momentum=True); 
     strategy = orders2strategy(orders, price, min_stocks)
         
     # do the backtest
     bt = twp.Backtest(price, strategy, initialCash=initialCash, signalType='shares')
     if charts:
-        figure()  
+        print "#1) Automatic buy/sales visualisation of the current strategy (buy=long, short=sale)"
+        figure()
         bt.plotTrades(stockname)
+        print "#2) Evaluation of the strategy (PnL (Profit & Log) = Value today - Value yesterday)"
         figure()
         bt.pnl.plot()
         title('pnl '+stockname)
-        
+        print "#3) big picture: Price, shares, value, cash & PnL"
         bt.data.plot()
         title('all strategy data %s' %stockname)
+        
     return bt.data
 
 def eval_best(stocks=["TSLA", "GS", "SCTY", "AMZN", "CSCO", 'UTX','JCI',"GOOGL",'AAPL','BP'],
               field='open', months=12, 
               initialCash=20000, min_stocks=30, 
-              charts=True, verbose=False):
+              charts=True, verbose=False, debug=False):
   # try current strategy on different stock
   trademap = {}
   tradedetails = {}
 
   for i, stock in enumerate(stocks):
-    trade = eval(stock, field='open', months=months, initialCash=20000, min_stocks=30, 
-                          charts=charts, verbose=verbose)
-    if verbose:
+    trade = eval(stock, field=field, months=months, initialCash=initialCash, 
+                 min_stocks=min_stocks, charts=charts, verbose=False, debug=debug)
+    if False:
       print i, stock, trade.ix[-1:,'cash':]
     trademap[stock] = trade[-1:]['pnl'][-1]
     tradedetails[stock] = trade[-1:]
   st = SortHistogram(trademap, False, True)
   if verbose:
+    print "Here are the Stocks sorted by PnL"
     for i,el in enumerate(st):
       stock, value = el
       print "#", i+1, stock, tradedetails[stock]

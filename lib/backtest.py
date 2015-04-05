@@ -165,7 +165,7 @@ class Backtest(object):
         plt.xlim([p.index[0],p.index[-1]]) # show full axis
         
         plt.legend(l,loc='best')
-        plt.title('trades%s' %name)
+        plt.title('trades for %s' %name)
         
         
 class ProgressBar:
