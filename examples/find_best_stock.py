@@ -10,10 +10,10 @@ verbose = True
 months=12
 
 stocks = ["TSLA", "GS", "SCTY", "AMZN", "CSCO", 
-          'UTX','JCI',"GOOGL",'AAPL','BP']
+          'UTX','JCI',"GOOGL",'AAPL','BP','MSFT']
 
 # try current strategy on different stock
 strategy.eval_best(stocks, field='open', months=months, 
                   initialCash=10000, min_stocks=50, 
-                  charts=charts, verbose=verbose)
+                  charts=charts, verbose=verbose);
   

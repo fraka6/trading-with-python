@@ -7,10 +7,8 @@ from filter import movingaverage
 #!pip install mlboost
 from mlboost.core.pphisto import SortHistogram
 
-try:
-    import lib
-except:
-    import twp.lib as lib
+import os
+os.path.dirname(os.path.join(os.path.abspath(__file__), '..'))
       
 def orders_from_trends(x, segments=2, charts=True, window=7, momentum=False):
     ''' generate orders from segtrends '''
@@ -108,7 +106,7 @@ def eval(stockname='TSLA', field='open', months=12,
         
     return btr.data
 
-def eval_best(stocks=["TSLA", "GS", "SCTY", "AMZN", "CSCO", 'UTX','JCI',"GOOGL",'AAPL','BP'],
+def eval_best(stocks=["TSLA", "GS", "SCTY", "AMZN", "CSCO", 'UTX','JCI',"GOOGL",'AAPL','BP','MSFT'],
               field='open', months=12, 
               initialCash=20000, min_stocks=30, 
               charts=True, verbose=False, debug=False):
