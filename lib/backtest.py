@@ -70,7 +70,7 @@ class Backtest(object):
     Backtest class, simple vectorized one. Works with pandas objects.
     """
     
-    def __init__(self,price, signal, signalType='capital',initialCash = 0, roundShares=True):
+    def __init__(self,price, signal, signalType='capital', initialCash = 0, roundShares=True):
         """
         Arguments:
         
@@ -85,7 +85,8 @@ class Backtest(object):
         #TODO: add auto rebalancing
         
         # check for correct input
-        assert signalType in ['capital','shares'], "Wrong signal type provided, must be 'capital' or 'shares'"
+        signal_choices = ['capital','shares', "orders"]
+        assert signalType in signal_choices, "Wrong signal type provided, must be %s" %' or '.join(signal_choices)
         
         #save internal settings to a dict
         self.settings = {'signalType':signalType}
@@ -94,26 +95,28 @@ class Backtest(object):
         self.signal = signal.ffill().fillna(0)
         
         # now find dates with a trade
-        tradeIdx = self.signal.diff().fillna(0) !=0 # days with trades are set to True
-        if signalType == 'shares':
-            self.trades = self.signal[tradeIdx] # selected rows where tradeDir changes value. trades are in Shares
-        elif signalType =='capital':
-            self.trades = (self.signal[tradeIdx]/price[tradeIdx])
+        if signalType in ('shares', 'capital'):
+            self.trades = self.signal.diff().fillna(0)
+            tradeIdx = self.trades != 0 # days with trades are set to True
+            if signalType == 'capital':
+                self.trades = (self.signal[tradeIdx]/price[tradeIdx]).reindex(self.data.index).ffill().fillna(0)
             if roundShares:
                 self.trades = self.trades.round()
+        elif signalType == 'orders':
+            self.trades = self.signal
         
         # now create internal data structure 
-        self.data = pd.DataFrame(index=price.index , columns = ['price','shares','value','cash','pnl'])
+        self.data = pd.DataFrame(index=price.index , columns = ['trades','price','shares','value','cash','total','pnl'])
         self.data['price'] = price
-        
-        self.data['shares'] = self.trades.reindex(self.data.index).ffill().fillna(0)
+        self.data['trades'] = self.trades
+        self.data['shares'] = self.trades.cumsum()
         self.data['value'] = self.data['shares'] * self.data['price']
        
         delta = self.data['shares'].diff() # shares bought sold
         
         self.data['cash'] = (-delta*self.data['price']).fillna(0).cumsum()+initialCash
         self.data['pnl'] = self.data['cash']+self.data['value']-initialCash
-      
+        self.data['total'] = self.data['cash']+self.data['value']
       
     @property
     def sharpe(self):

@@ -1,9 +1,9 @@
 import numpy as np
-from trendy import segtrends
 import pandas as pd
-#import tradingWithPython as twp
-#from lib import backtest
 from filter import movingaverage
+import math
+from trendy import segtrends
+
 #!pip install mlboost
 from mlboost.core.pphisto import SortHistogram
 
@@ -44,12 +44,11 @@ def orders_from_trends(x, segments=2, charts=True, window=7, momentum=False):
         last_buy = y[i] if (buy==1) else last_buy
         last_sale = y[i] if (buy==-1) else last_sale
         
-        import math
         if momentum:
             # add momentum for buy 
             if (buy==1) and (orders[i-1]>=1):
                 #if buy_price_dec:
-                orders[i]=round(math.log(2*orders[i-1])+1)
+                orders[i]=orders[i-1]*2#round(math.log(2*orders[i-1])+1)
                 #else:
                  #   orders[i]=max(1, round(orders[i-1]/2))
             # add momentum for sale
@@ -71,9 +70,10 @@ def orders2strategy(orders, price, min_stocks=1):
             strategy[idx] = orders[i]
     return strategy
 
-def eval(stockname='TSLA', field='open', months=12, 
-        initialCash=20000, min_stocks=30, 
-        charts=True, verbose=False, debug=False):
+def eval(stockname='TSLA', field='open', months=12, initialCash=20000, 
+        min_stocks=30, charts=True, verbose=False, debug=False,
+        signalType='shares'):
+
     if verbose:
       print "Evaluation ", stockname
     
@@ -92,7 +92,7 @@ def eval(stockname='TSLA', field='open', months=12,
     strategy = orders2strategy(orders, price, min_stocks)
         
     # do the backtest
-    btr = bt.Backtest(price, strategy, initialCash=initialCash, signalType='shares')
+    btr = bt.Backtest(price, strategy, initialCash=initialCash, signalType=signalType)
     if charts:
         print "#1) Automatic buy/sales visualisation of the current strategy (buy=long, short=sale)"
         figure()
